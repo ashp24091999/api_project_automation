@@ -1,0 +1,98 @@
+{
+  "foods": [
+    {
+      "id": 1,
+      "name": "cucumber salad",
+      "price": 2.5
+    },
+    {
+      "id": 2,
+      "name": "french fries",
+      "price": 5.5
+    },
+    {
+      "id": 3,
+      "name": "soft drink",
+      "price": 5.5
+    },
+    {
+      "id": 4,
+      "name": "burgers",
+      "price": 9.55
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+	  "userid" : 1,
+      "body": "delicious",
+      "foodId": 1
+    },
+    {
+      "id": 2,
+	  "userid" : 2,
+      "body": "well done",
+      "foodId": 1
+    },
+    {
+      "id": 3,
+	  "userid" : 3,
+      "body": "it is okay",
+      "foodId": 3
+    },
+    {
+      "id": 4,
+	  "userid" : 1,
+      "body": "amazing",
+      "foodId": 4
+    }
+  ],
+  "managers": [
+    {
+      "id": 1,
+      "salary": 1000,
+      "age": 35,
+      "name": "Bell Pepper",
+      "staffs": [
+        {
+          "id": 0,
+          "name": "Ellison Diaz",
+		  "salary": 500
+        },
+        {
+          "id": 1,
+          "name": "Naomi Freeman",
+		  "salary": 200
+        },
+        {
+          "id": 2,
+          "name": "Kristina Wagner",
+		  "salary": 300
+        }
+      ]
+    },
+	{
+      "id": 2,
+      "salary": 1500,
+      "age": 33,
+      "name": "Fish Fillet",
+      "staffs": [
+        {
+          "id": 0,
+          "name": "Beatriz Wolfe",
+		  "salary": 500
+        },
+        {
+          "id": 1,
+          "name": "Rosemary Booth",
+		  "salary": 150
+        },
+        {
+          "id": 2,
+          "name": "Myrtle Lara",
+		  "salary": 300
+        }
+      ]
+    }
+  ]
+}
