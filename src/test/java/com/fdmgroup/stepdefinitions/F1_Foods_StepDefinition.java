@@ -1,7 +1,9 @@
 package com.fdmgroup.stepdefinitions;
 
 import static org.hamcrest.Matchers.notNullValue;
-import static org.testng.Assert.assertEquals;
+
+import static org.junit.Assert.assertEquals;
+
 
 import java.util.List;
 
