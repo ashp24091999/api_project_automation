@@ -1,60 +1,80 @@
 pipeline {
-    agent any
+  agent any
 
-    tools {
-        // Must match names in "Global Tool Configuration"
-        jdk 'jdk-21'
-        maven 'maven-3.9'
+  tools {
+    jdk   'jdk-21'
+    maven 'maven-3.9'   // must match Manage Jenkins > Tools > Maven name
+  }
+
+  environment {
+    // Your API base URL (json-server you start manually)
+    BASE_URL = 'http://localhost:3000'
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
 
-    environment {
-        // Your json-server base URL (started manually on port 3000)
-        BASE_URL = 'http://localhost:3000'
+    stage('Build & Test API') {
+      steps {
+        echo "Running API tests against ${env.BASE_URL}"
+
+        // If your tests read System.getProperty("baseUrl"), this will pass it:
+        // Make sure your test code uses it, e.g. System.getProperty("baseUrl", "http://localhost:3000")
+        bat 'mvn -B -DbaseUrl=%BASE_URL% clean test'
+      }
     }
 
-    stages {
+    stage('Publish Reports') {
+      steps {
+        echo 'Publishing Cucumber API reports...'
 
-        stage('Checkout') {
-            steps {
-                echo 'Checking out source code from GitHub...'
-                checkout scm
-            }
+        // 1) JUnit results (if any). allowEmptyResults so it doesn't fail the build if none.
+        junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+
+        // 2) Find & publish the Cucumber HTML report (similar style to your previous project)
+        script {
+          // Adjust these paths to how your API project writes the Cucumber HTML
+          // With @CucumberOptions(plugin = {"pretty","json:target/cucumber-report.json","html:target/cucumber-html-report"})
+          // the main file is usually: target/cucumber-html-report/index.html
+          def candidates = [
+            'target/cucumber-html-report/index.html',
+            'target/cucumber-html-report/cucumber.html',
+            'target/cucumber-reports/index.html',
+            'target/cucumber-reports/overview-features.html'
+          ]
+
+          def found = candidates.find { fileExists(it) }
+          if (found) {
+            echo "Publishing Cucumber report: ${found}"
+            def dir  = found.substring(0, found.lastIndexOf('/'))
+            def file = found.substring(found.lastIndexOf('/') + 1)
+            publishHTML([
+              reportDir: dir,
+              reportFiles: file,
+              reportName: 'Cucumber API Report',
+              keepAll: true,
+              alwaysLinkToLastBuild: true,
+              allowMissing: false
+            ])
+          } else {
+            echo "No Cucumber HTML report found in: ${candidates}"
+          }
         }
 
-        stage('Build Project') {
-            steps {
-                echo 'Compiling project and downloading dependencies...'
-                bat 'mvn clean compile -DskipTests'
-            }
-        }
-
-        stage('Run API Tests') {
-            steps {
-                echo 'Running Cucumber + Rest Assured tests...'
-                // If your tests read System.getProperty("baseUrl"), use this:
-                // bat 'mvn test -DbaseUrl=%BASE_URL%'
-                bat 'mvn test'
-            }
-        }
-
-        stage('Publish Reports') {
-            steps {
-                echo 'Publishing Cucumber reports...'
-
-                // Cucumber Reports plugin:
-                // Make sure your runner generates: json:target/cucumber-report.json
-                cucumber buildStatus: 'UNSTABLE',
-                          fileIncludePattern: 'cucumber-report.json',
-                          jsonReportDirectory: 'target',
-                          sortingMethod: 'ALPHABETICAL',
-                          trendsLimit: 10
-            }
-        }
+        // 3) (Optional) keep raw artifacts too
+        archiveArtifacts artifacts: 'target/**', fingerprint: true
+      }
     }
+  }
 
-    post {
-        always {
-            echo 'Pipeline finished.'
-        }
+  post {
+    always {
+      echo 'Pipeline finished.'
     }
+  }
 }
