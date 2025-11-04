@@ -25,29 +25,21 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- TestNG (optional but included for other test classes) -->
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>7.10.2</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- Jackson Datatype (for JSON serialization/deserialization) -->
+    <!-- Jackson Datatype (for JSON) -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jdk8</artifactId>
       <version>2.18.2</version>
     </dependency>
 
-    <!-- Selenium (if you use it in Hooks or elsewhere) -->
+    <!-- Selenium (if you ever use it) -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
       <version>4.37.0</version>
     </dependency>
 
-    <!-- JUnit -->
+    <!-- JUnit 4 -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -55,7 +47,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Cucumber (JUnit integration + step definitions) -->
+    <!-- Cucumber + JUnit integration -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit</artifactId>
@@ -69,7 +61,7 @@
       <version>7.20.1</version>
     </dependency>
 
-    <!-- JNA (used in Jenkins environments for native calls) -->
+    <!-- JNA (used in some Jenkins environments) -->
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
@@ -79,7 +71,7 @@
 
   </dependencies>
 
-  <!-- ✅ Added Surefire Plugin to explicitly include CucumberRunnerTest -->
+  <!-- Surefire plugin: always run CucumberRunnerTest -->
   <build>
     <plugins>
       <plugin>
