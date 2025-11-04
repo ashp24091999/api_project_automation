@@ -3,11 +3,11 @@ pipeline {
 
   tools {
     jdk   'jdk-21'
-    maven 'maven-3.9'   // must match Manage Jenkins > Tools > Maven name
+    maven 'maven-3.9'   // must match name in Global Tool Configuration
   }
 
   environment {
-    // Your API base URL (json-server you start manually)
+    // json-server base URL (you start it manually)
     BASE_URL = 'http://localhost:3000'
   }
 
@@ -15,6 +15,7 @@ pipeline {
 
     stage('Checkout') {
       steps {
+        echo 'Checking out source code from GitHub...'
         checkout scm
       }
     }
@@ -23,8 +24,7 @@ pipeline {
       steps {
         echo "Running API tests against ${env.BASE_URL}"
 
-        // If your tests read System.getProperty("baseUrl"), this will pass it:
-        // Make sure your test code uses it, e.g. System.getProperty("baseUrl", "http://localhost:3000")
+        // If your tests read System.getProperty("baseUrl"), this passes it in:
         bat 'mvn -B -DbaseUrl=%BASE_URL% clean test'
       }
     }
@@ -33,19 +33,17 @@ pipeline {
       steps {
         echo 'Publishing Cucumber API reports...'
 
-        // 1) JUnit results (if any). allowEmptyResults so it doesn't fail the build if none.
-        junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+        // 1) JUnit XML (from "junit:Report/cucumber.junit" if you want trend graphs)
+        // allowEmptyResults so pipeline doesn't fail if there's no XML
+        junit testResults: 'Report/*.junit', allowEmptyResults: true
 
-        // 2) Find & publish the Cucumber HTML report (similar style to your previous project)
+        // 2) Publish the Cucumber HTML report your runner generates: Report/cucumber.html
         script {
-          // Adjust these paths to how your API project writes the Cucumber HTML
-          // With @CucumberOptions(plugin = {"pretty","json:target/cucumber-report.json","html:target/cucumber-html-report"})
-          // the main file is usually: target/cucumber-html-report/index.html
           def candidates = [
-            'target/cucumber-html-report/index.html',
-            'target/cucumber-html-report/cucumber.html',
-            'target/cucumber-reports/index.html',
-            'target/cucumber-reports/overview-features.html'
+            'Report/cucumber.html',
+            'Report/index.html',
+            'Report/cucumber/index.html',
+            'Report/cucumber/cucumber.html',
           ]
 
           def found = candidates.find { fileExists(it) }
@@ -66,8 +64,8 @@ pipeline {
           }
         }
 
-        // 3) (Optional) keep raw artifacts too
-        archiveArtifacts artifacts: 'target/**', fingerprint: true
+        // 3) Archive both Report and target folders as artifacts
+        archiveArtifacts artifacts: 'Report/**, target/**', fingerprint: true
       }
     }
   }
