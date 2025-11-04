@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     tools {
-        // match tool names from Global Tool Configuration
         jdk 'jdk-21'
         maven 'maven-3.9'
     }
@@ -20,20 +19,6 @@ pipeline {
             }
         }
 
-        stage('Start JSON Server') {
-            steps {
-                echo 'Starting json-server on port 3000...'
-
-                // If 'json-server' is not recognized, replace with full path to json-server.cmd
-                bat '''
-                cd "%WORKSPACE%"
-                start "" json-server --watch database_project.json --port 3000
-                '''
-                // wait ~5 seconds so json-server is ready
-                bat 'ping 127.0.0.1 -n 6 >nul'
-            }
-        }
-
         stage('Build Project') {
             steps {
                 echo 'Compiling project and downloading dependencies...'
@@ -44,7 +29,7 @@ pipeline {
         stage('Run API Tests') {
             steps {
                 echo 'Running Cucumber + Rest Assured tests...'
-                // If your code reads System.getProperty("baseUrl"), you can do:
+                // if your code reads System.getProperty("baseUrl"), you can do:
                 // bat 'mvn test -DbaseUrl=%BASE_URL%'
                 bat 'mvn test'
             }
@@ -53,11 +38,8 @@ pipeline {
         stage('Publish Reports') {
             steps {
                 echo 'Publishing JUnit and Cucumber reports...'
-
-                // 1) JUnit reports (from Surefire/TestNG)
                 junit 'target/surefire-reports/*.xml'
 
-                // 2) Cucumber reports (needs Cucumber Reports plugin)
                 cucumber buildStatus: 'UNSTABLE',
                           fileIncludePattern: 'cucumber-report.json',
                           jsonReportDirectory: 'target',
@@ -69,12 +51,8 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished. Cleaning up...'
-
-            // Kill json-server / node so port 3000 is free for next build
-            bat '''
-            taskkill /F /IM node.exe || echo "No node.exe processes to kill"
-            '''
+            echo 'Pipeline finished.'
+            // no taskkill here; json-server is manual
         }
     }
 }
