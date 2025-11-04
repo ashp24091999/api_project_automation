@@ -27,7 +27,7 @@ pipeline {
                 // If 'json-server' is not recognized, replace with full path to json-server.cmd
                 bat '''
                 cd "%WORKSPACE%"
-                start "" json-server --watch db.json --port 3000
+                start "" json-server --watch database_project.json --port 3000
                 '''
                 // wait ~5 seconds so json-server is ready
                 bat 'ping 127.0.0.1 -n 6 >nul'
