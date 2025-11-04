@@ -21,7 +21,4 @@ import io.cucumber.junit.CucumberOptions;
 	publish = true
 )
 public class CucumberRunner {
-	
-	
-
 }
