@@ -2,11 +2,13 @@ pipeline {
     agent any
 
     tools {
+        // Must match names in "Global Tool Configuration"
         jdk 'jdk-21'
         maven 'maven-3.9'
     }
 
     environment {
+        // Your json-server base URL (started manually on port 3000)
         BASE_URL = 'http://localhost:3000'
     }
 
@@ -29,7 +31,7 @@ pipeline {
         stage('Run API Tests') {
             steps {
                 echo 'Running Cucumber + Rest Assured tests...'
-                // if your code reads System.getProperty("baseUrl"), you can do:
+                // If your tests read System.getProperty("baseUrl"), use this:
                 // bat 'mvn test -DbaseUrl=%BASE_URL%'
                 bat 'mvn test'
             }
@@ -37,9 +39,10 @@ pipeline {
 
         stage('Publish Reports') {
             steps {
-                echo 'Publishing JUnit and Cucumber reports...'
-                junit 'target/surefire-reports/*.xml'
+                echo 'Publishing Cucumber reports...'
 
+                // Cucumber Reports plugin:
+                // Make sure your runner generates: json:target/cucumber-report.json
                 cucumber buildStatus: 'UNSTABLE',
                           fileIncludePattern: 'cucumber-report.json',
                           jsonReportDirectory: 'target',
@@ -52,7 +55,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
-            // no taskkill here; json-server is manual
         }
     }
 }
