@@ -3,12 +3,7 @@ pipeline {
 
   tools {
     jdk   'jdk-21'
-    maven 'maven-3.9'   // must match name in Global Tool Configuration
-  }
-
-  environment {
-    // json-server base URL (you start it manually)
-    BASE_URL = 'http://localhost:3000'
+    maven 'maven-3.9'
   }
 
   stages {
@@ -22,10 +17,8 @@ pipeline {
 
     stage('Build & Test API') {
       steps {
-        echo "Running API tests against ${env.BASE_URL}"
-
-        // If your tests read System.getProperty("baseUrl"), this passes it in:
-        bat 'mvn -B -DbaseUrl=%BASE_URL% clean test'
+        echo 'Running Cucumber API tests...'
+        bat 'mvn -B clean test -Dtest=CucumberRunnerTest'
       }
     }
 
@@ -33,17 +26,14 @@ pipeline {
       steps {
         echo 'Publishing Cucumber API reports...'
 
-        // 1) JUnit XML (from "junit:Report/cucumber.junit" if you want trend graphs)
-        // allowEmptyResults so pipeline doesn't fail if there's no XML
         junit testResults: 'Report/*.junit', allowEmptyResults: true
 
-        // 2) Publish the Cucumber HTML report your runner generates: Report/cucumber.html
         script {
           def candidates = [
             'Report/cucumber.html',
             'Report/index.html',
             'Report/cucumber/index.html',
-            'Report/cucumber/cucumber.html',
+            'Report/cucumber/cucumber.html'
           ]
 
           def found = candidates.find { fileExists(it) }
@@ -64,7 +54,6 @@ pipeline {
           }
         }
 
-        // 3) Archive both Report and target folders as artifacts
         archiveArtifacts artifacts: 'Report/**, target/**', fingerprint: true
       }
     }
